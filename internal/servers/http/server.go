@@ -5,6 +5,8 @@ import (
     "log"
     "net/http"
 
+	"blog/internal/routes" 
+
     _ "github.com/mattn/go-sqlite3"
 )
 
@@ -26,9 +28,9 @@ func StartServer() {
         log.Fatal(err)
     }
 
-    // Initialize routes
-    initRoutes()
-
+    // Initialize routes from the routes package
+    routes.Init()
+	
     // Start HTTP server
     log.Println("Starting server on port 8181...")
     if err := http.ListenAndServe(":8181", nil); err != nil {
@@ -36,14 +38,3 @@ func StartServer() {
     }
 }
 
-func initRoutes() {
-    // Define your HTTP routes here
-    http.HandleFunc("/", handler)
-}
-
-// Handler is your HTTP request handler
-func handler(w http.ResponseWriter, r *http.Request) {
-    // Respond with "Hello, World!"
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Hello, World!"))
-}
