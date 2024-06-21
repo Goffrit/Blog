@@ -2,7 +2,6 @@
 
 package http
 
-
 import (
     "database/sql"
     "log"
@@ -20,7 +19,6 @@ var db *sql.DB
 
 // StartServer initializes and starts the HTTP server
 func StartServer() {
-
     // Load environment variables from .env file
     err := godotenv.Load()
     if err != nil {
@@ -53,8 +51,8 @@ func StartServer() {
     router := routes.Init()
 
     // Start HTTP server
-    log.Println("Starting server on port 8181...")
-    if err := http.ListenAndServe(":8181", router); err != nil {
+    log.Printf("Starting server on port %s...\n", port)
+    if err := http.ListenAndServe(":"+port, router); err != nil {
         log.Fatalf("Failed to start server: %v", err)
     }
 }
