@@ -3,13 +3,13 @@
 package routes
 
 import (
-	"net/http"
-
-	"blog/internal/handlers" // Import handlers package
+    "blog/internal/handlers"
+    "github.com/gorilla/mux"
 )
 
 // Init initializes HTTP routes
-func Init() {
-	// Define routes here
-	http.HandleFunc("/", handlers.HelloHandler)
+func Init() *mux.Router {
+    router := mux.NewRouter()
+    router.HandleFunc("/users/{userID}", handlers.GetUserHandler).Methods("GET")
+    return router
 }

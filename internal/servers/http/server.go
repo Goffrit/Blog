@@ -1,12 +1,13 @@
+// internal/servers/http/server.go
+
 package http
 
 import (
     "database/sql"
     "log"
     "net/http"
-
-	"blog/internal/routes" 
-
+    "blog/internal/routes"
+    "blog/internal/handlers"
     _ "github.com/mattn/go-sqlite3"
 )
 
@@ -28,13 +29,15 @@ func StartServer() {
         log.Fatal(err)
     }
 
-    // Initialize routes from the routes package
-    routes.Init()
-	
+    // Set the database connection for handlers
+    handlers.SetDB(db)
+
+    // Initialize routes
+    router := routes.Init()
+
     // Start HTTP server
     log.Println("Starting server on port 8181...")
-    if err := http.ListenAndServe(":8181", nil); err != nil {
+    if err := http.ListenAndServe(":8181", router); err != nil {
         log.Fatalf("Failed to start server: %v", err)
     }
 }
-
