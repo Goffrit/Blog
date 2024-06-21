@@ -11,5 +11,6 @@ import (
 func Init() *mux.Router {
     router := mux.NewRouter()
     router.HandleFunc("/users/{userID}", handlers.GetUserHandler).Methods("GET")
+    router.HandleFunc("/users/special", handlers.HelloHandler).Methods("GET")
     return router
 }
