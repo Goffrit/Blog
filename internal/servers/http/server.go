@@ -13,6 +13,7 @@ import (
 	"blog/internal/handlers"
 	"blog/internal/handlers/auth"
 	"blog/internal/routes"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -32,8 +33,20 @@ func StartServer() {
 		log.Fatal("PORT environment variable is not set")
 	}
 
+	// Get the driver from environment variables
+	driver := os.Getenv("DRIVER")
+	if driver == "" {
+		log.Fatal("DRIVER environment variable is not set")
+	}
+
+	// Get the data source from environment variables
+	dataSource := os.Getenv("DATA_SOURCE")
+	if dataSource == "" {
+		log.Fatal("DATA_SOURCE environment variable is not set")
+	}
+
 	// Open SQLite database
-	db, err = sql.Open("sqlite3", "file:config/sqlite.db")
+	db, err = sql.Open(driver, dataSource)
 	if err != nil {
 		log.Fatal(err)
 	}
