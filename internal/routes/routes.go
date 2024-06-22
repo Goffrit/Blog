@@ -10,7 +10,8 @@ import (
 // Init initializes HTTP routes
 func Init() *mux.Router {
     router := mux.NewRouter()
-    router.HandleFunc("/users/{userID}", handlers.GetUserHandler).Methods("GET")
     router.HandleFunc("/users/special", handlers.HelloHandler).Methods("GET")
+    router.HandleFunc("/users/{userID}", handlers.GetUserHandler).Methods("GET")
+    router.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
     return router
 }
