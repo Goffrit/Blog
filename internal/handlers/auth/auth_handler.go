@@ -4,6 +4,7 @@ package auth
 
 import (
 	"blog/internal/models"
+	"blog/internal/utils"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -47,11 +48,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashedPassword, err := utils.HashPassword(request.Password)
+	if err != nil {
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
 	// Create the new user
 	userParams := models.CreateUserParams{
 		Username: request.Username,
 		Email:    request.Email,
-		Password: request.Password, // You should hash the password before storing it
+		Password: hashedPassword, // You should hash the password before storing it
 		FullName: sql.NullString{String: "", Valid: false},
 		DateOfBirth: sql.NullTime{
 			Time:  time.Time{},

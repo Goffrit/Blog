@@ -116,3 +116,31 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 	}
 	return items, nil
 }
+
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT user_id, username, password, email, full_name
+FROM users 
+WHERE email = ?
+`
+
+type GetUserByEmailRow struct {
+	UserID      interface{}    `json:"user_id"`
+	Username    string         `json:"username"`
+	Password    string         `json:"password"`
+	Email       string         `json:"email"`
+	FullName    sql.NullString `json:"full_name"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.FullName,
+	)
+	return i, err
+}

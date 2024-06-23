@@ -15,5 +15,6 @@ func Init() *mux.Router {
 	router.HandleFunc("/users/special", handlers.HelloHandler).Methods("GET")
 	router.HandleFunc("/users/{userID}", handlers.GetUserHandler).Methods("GET")
 	router.HandleFunc("/register", auth.RegisterHandler).Methods("POST")
+	router.HandleFunc("/login", auth.LoginHandler).Methods("GET")
 	return router
 }
