@@ -10,12 +10,18 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"regexp"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 var db *sql.DB
 var queries *models.Queries
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
+}
 
 // SetDB sets the database connection for the handlers
 func SetDB(database *sql.DB) {
@@ -26,10 +32,10 @@ func SetDB(database *sql.DB) {
 // RegisterHandler handles the user registration
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var request struct {
-		Username   string `json:"username"`
-		Email      string `json:"email"`
-		Password   string `json:"password"`
-		RePassword string `json:"re_password"`
+		Username   string `json:"username" validate:"required,min=3,max=32"`
+		Email      string `json:"email" validate:"required,email"`
+		Password   string `json:"password" validate:"required,min=6"`
+		RePassword string `json:"re_password" validate:"required,eqfield=Password"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -37,14 +43,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if request.Password != request.RePassword {
-		http.Error(w, "Passwords do not match", http.StatusBadRequest)
-		return
-	}
-
-	emailRegex := `^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`
-	if match, _ := regexp.MatchString(emailRegex, request.Email); !match {
-		http.Error(w, "Invalid email format", http.StatusBadRequest)
+	if err := validate.Struct(request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -54,11 +54,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if the email already exists in the database
+	if utils.EmailExists(request.Email) {
+		http.Error(w, "Email already exists", http.StatusConflict)
+		return
+	}
+
 	// Create the new user
 	userParams := models.CreateUserParams{
 		Username: request.Username,
 		Email:    request.Email,
-		Password: hashedPassword, // You should hash the password before storing it
+		Password: hashedPassword,
 		FullName: sql.NullString{String: "", Valid: false},
 		DateOfBirth: sql.NullTime{
 			Time:  time.Time{},
@@ -68,7 +74,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	if err := queries.CreateUser(ctx, userParams); err != nil {
-		log.Printf("Failed to create user: %v", err) // Log the specific error
+		log.Printf("Failed to create user: %v", err)
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}

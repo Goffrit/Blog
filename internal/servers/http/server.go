@@ -13,6 +13,7 @@ import (
 	"blog/internal/handlers"
 	"blog/internal/handlers/auth"
 	"blog/internal/routes"
+	"blog/internal/utils"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -63,6 +64,9 @@ func StartServer() {
 
 	// Set the database connection for handlers
 	auth.SetDB(db)
+
+	//Set the database connection for utils package
+	utils.SetDB(db)
 
 	// Initialize routes
 	router := routes.Init()
